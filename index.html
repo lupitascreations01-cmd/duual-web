@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Duual — Compatibilidad astrológica real. No horóscopos genéricos. Calcula tu compatibilidad con carta natal real.">
+<meta property="og:title" content="Duual · ¿Cuánto se alinean tus planetas con los suyos?">
+<meta property="og:description" content="Compatibilidad astrológica real. No signos solares. Carta natal completa con engine astronómico.">
+<meta property="og:type" content="website">
+<title>Duual · Compatibilidad Astrológica Real</title>
+
+<!-- Schema markup SoftwareApplication -->
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"SoftwareApplication",
+  "name":"Duual: Compatibilidad Pareja",
+  "operatingSystem":"Android",
+  "applicationCategory":"LifestyleApplication",
+  "offers":{"@type":"Offer","price":"4.99","priceCurrency":"USD"},
+  "description":"Compatibilidad astrológica real basada en carta natal completa. No horóscopos genéricos.",
+  "url":"https://duual.app",
+  "downloadUrl":"https://play.google.com/store/apps/details?id=com.duual.app"
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/source/js/astronomy.browser.js"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ink:#080612;
+  --ink2:#0e0a1e;
+  --rose:#C94B72;
+  --rose-m:#ED93B1;
+  --rose-l:rgba(201,75,114,0.15);
+  --plum:#6B63CC;
+  --plum-l:rgba(107,99,204,0.15);
+  --gold:#D4920E;
+  --teal:#1B9E78;
+  --txt:#F2EEF9;
+  --txt2:rgba(242,238,249,0.65);
+  --txt3:rgba(242,238,249,0.35);
+  --bord:rgba(242,238,249,0.08);
+  --bord2:rgba(242,238,249,0.18);
+  --surf:rgba(255,255,255,0.04);
+  --surf2:rgba(255,255,255,0.07);
+}
+html{scroll-behavior:smooth;}
+body{
+  font-family:"DM Sans",sans-serif;
+  background:var(--ink);
+  color:var(--txt);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* ── STARS BG ── */
+#stars{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+#stars canvas{width:100%;height:100%;}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:16px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(8,6,18,0.6);
+  backdrop-filter:blur(16px);
+  border-bottom:0.5px solid var(--bord);
+}
+.nav-logo{
+  font-family:"Cormorant Garamond",serif;
+  font-size:28px;font-weight:400;
+  letter-spacing:1px;color:var(--txt);
+  text-decoration:none;
+}
+.nav-logo em{font-style:italic;color:var(--rose-m);}
+.nav-cta{
+  padding:9px 22px;
+  background:var(--rose);
+  border:none;border-radius:50px;
+  font-family:"DM Sans",sans-serif;
+  font-size:13px;font-weight:500;
+  color:#fff;cursor:pointer;
+  text-decoration:none;
+  transition:opacity .2s;
+}
+.nav-cta:hover{opacity:.85;}
+.nav-lang{
+  display:flex;gap:4px;
+  background:var(--surf);
+  border:0.5px solid var(--bord2);
+  border-radius:50px;
+  padding:3px;
+  margin-right:12px;
+}
+.nl{padding:5px 14px;border-radius:50px;border:none;background:transparent;
+  font-family:"DM Sans",sans-serif;font-size:12px;color:var(--txt3);cursor:pointer;}
+.nl.on{background:var(--rose);color:#fff;}
+.nav-right{display:flex;align-items:center;gap:8px;}
+
+/* ── SECTIONS ── */
+section{position:relative;z-index:1;}
+
+/* ── HERO ── */
+#hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:120px 24px 80px;
+  text-align:center;
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:6px 16px;
+  border:0.5px solid rgba(107,99,204,0.4);
+  border-radius:50px;
+  background:var(--plum-l);
+  font-size:11px;font-weight:500;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:#9E97F0;
+  margin-bottom:28px;
+}
+.hero-title{
+  font-family:"Cormorant Garamond",serif;
+  font-size:clamp(48px,8vw,86px);
+  font-weight:300;line-height:1.05;
+  letter-spacing:-1px;
+  color:var(--txt);
+  margin-bottom:20px;
+  max-width:820px;
+}
+.hero-title em{font-style:italic;color:var(--rose-m);}
+.hero-sub{
+  font-size:clamp(15px,2vw,18px);
+  color:var(--txt2);
+  line-height:1.7;
+  max-width:520px;
+  margin:0 auto 40px;
+}
+.hero-arrow{
+  margin-top:60px;
+  animation:bounce 2s ease-in-out infinite;
+  color:var(--txt3);
+  font-size:24px;
+  cursor:pointer;
+}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(8px);}}
+
+/* ── CALCULATOR ── */
+#calc{
+  padding:80px 24px;
+  max-width:720px;
+  margin:0 auto;
+}
+.calc-label{
+  font-size:10px;font-weight:500;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--txt3);
+  margin-bottom:24px;
+  text-align:center;
+}
+.persons-wrap{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  gap:0;
+  align-items:start;
+}
+.person-card{
+  background:var(--surf);
+  border:0.5px solid var(--bord2);
+  border-radius:20px;
+  padding:24px 20px;
+}
+.person-dot{
+  width:8px;height:8px;border-radius:50%;
+  display:inline-block;margin-right:8px;
+  flex-shrink:0;
+}
+.pa-dot{background:var(--rose-m);}
+.pb-dot{background:#9E97F0;}
+.person-header{
+  font-size:10px;font-weight:500;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--txt3);
+  display:flex;align-items:center;
+  margin-bottom:16px;
+}
+.finput{
+  width:100%;
+  background:var(--surf2);
+  border:0.5px solid var(--bord);
+  border-radius:10px;
+  padding:11px 14px;
+  font-family:"DM Sans",sans-serif;
+  font-size:14px;color:var(--txt);
+  outline:none;
+  -webkit-appearance:none;
+  margin-bottom:10px;
+  transition:border-color .2s;
+}
+.finput:focus{border-color:var(--bord2);}
+.finput::placeholder{color:var(--txt3);}
+.finput[type="date"]{color-scheme:dark;}
+.finput[type="time"]{color-scheme:dark;}
+.finput-label{font-size:11px;color:var(--txt3);margin-bottom:5px;display:block;}
+.time-hint{font-size:10px;color:var(--txt3);line-height:1.5;margin-top:-4px;margin-bottom:10px;}
+
+.connector-col{
+  display:flex;align-items:center;justify-content:center;
+  padding:0 16px;
+  margin-top:60px;
+}
+.conn-icon{
+  width:40px;height:40px;
+  border-radius:50%;
+  background:var(--rose-l);
+  border:0.5px solid rgba(201,75,114,0.4);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+}
+
+.calc-cta{
+  width:100%;margin-top:24px;
+  padding:18px;
+  background:linear-gradient(135deg,var(--rose),var(--plum));
+  border:none;border-radius:16px;
+  font-family:"DM Sans",sans-serif;
+  font-size:16px;font-weight:500;
+  color:#fff;cursor:pointer;
+  transition:opacity .2s,transform .1s;
+  position:relative;overflow:hidden;
+}
+.calc-cta:hover{opacity:.9;}
+.calc-cta:active{transform:scale(.99);}
+.calc-cta::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);
+  transform:translateX(-100%);
+  transition:transform .6s;
+}
+.calc-cta:hover::after{transform:translateX(100%);}
+
+/* ── LOADING ── */
+#loadingWrap{
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:60px 24px;
+  text-align:center;
+}
+.orbit{position:relative;width:100px;height:100px;margin:0 auto 28px;}
+.oring{position:absolute;border:1px solid var(--bord);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);}
+.or1{width:28px;height:28px;border-color:rgba(237,147,177,0.5);}
+.or2{width:60px;height:60px;border-color:rgba(107,99,204,0.3);animation:spin 4s linear infinite;}
+.or3{width:90px;height:90px;border-color:rgba(237,147,177,0.1);animation:spin-r 7s linear infinite;}
+.ocen{position:absolute;width:12px;height:12px;background:var(--rose-l);border:1px solid var(--rose);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);}
+.opl{position:absolute;border-radius:50%;top:50%;left:50%;}
+.op1{width:7px;height:7px;background:var(--rose-m);animation:orb1 3s linear infinite;}
+.op2{width:5px;height:5px;background:#9E97F0;animation:orb2 5s linear infinite;}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg);}}
+@keyframes spin-r{to{transform:translate(-50%,-50%) rotate(-360deg);}}
+@keyframes orb1{to{transform:translate(-50%,-50%) rotate(360deg) translateX(30px);}}
+@keyframes orb2{to{transform:translate(-50%,-50%) rotate(450deg) translateX(46px);}}
+.load-text{font-family:"Cormorant Garamond",serif;font-size:22px;font-weight:300;color:var(--txt2);}
+.load-dots{display:flex;gap:5px;justify-content:center;margin-top:16px;}
+.ld{width:5px;height:5px;border-radius:50%;background:var(--rose-m);animation:lpulse 1.4s ease-in-out infinite;}
+.ld:nth-child(2){animation-delay:.22s;}.ld:nth-child(3){animation-delay:.44s;}
+@keyframes lpulse{0%,80%,100%{opacity:.2;transform:scale(.7);}40%{opacity:1;transform:scale(1);}}
+
+/* ── RESULT ── */
+#resultWrap{display:none;padding:0 24px 80px;max-width:720px;margin:0 auto;}
+
+.result-hero{text-align:center;padding:40px 0 32px;border-bottom:0.5px solid var(--bord);}
+.score-container{
+  position:relative;
+  display:inline-flex;align-items:center;justify-content:center;
+  width:180px;height:180px;
+}
+.score-container::before{
+  content:'';position:absolute;inset:-20px;
+  background:radial-gradient(circle,rgba(201,75,114,0.35) 0%,rgba(107,99,204,0.2) 40%,transparent 70%);
+  filter:blur(20px);
+  animation:sglow 3s ease-in-out infinite;
+}
+@keyframes sglow{0%,100%{opacity:.5;}50%{opacity:1;}}
+.score-svg{position:relative;z-index:1;width:100%;height:100%;transform:rotate(-90deg);}
+.score-track{fill:none;stroke:rgba(255,255,255,0.05);stroke-width:7;}
+.score-prog{fill:none;stroke:url(#sGrad);stroke-width:7;stroke-linecap:round;
+  filter:drop-shadow(0 0 6px rgba(201,75,114,0.6));
+  transition:stroke-dashoffset 1.4s cubic-bezier(.22,1,.36,1);}
+.big-score{
+  position:absolute;z-index:2;
+  font-family:"DM Sans",sans-serif;
+  font-size:72px;font-weight:200;
+  color:var(--txt);line-height:1;
+  display:flex;align-items:baseline;
+  letter-spacing:-2px;
+}
+.big-score .pct{font-size:24px;color:var(--rose-m);font-weight:300;margin-left:2px;align-self:flex-start;margin-top:12px;}
+
+.result-pair{font-family:"Cormorant Garamond",serif;font-size:22px;font-weight:300;
+  color:var(--txt2);margin-top:16px;letter-spacing:.5px;}
+.result-pair em{font-style:normal;color:var(--rose-m);}
+.verdict-badge{
+  display:inline-block;
+  margin-top:14px;
+  padding:8px 20px;
+  border-radius:50px;
+  background:var(--rose-l);
+  border:0.5px solid rgba(201,75,114,0.35);
+  font-size:13px;color:var(--rose-m);
+  letter-spacing:.3px;
+}
+.verdict-text{
+  margin-top:16px;
+  font-size:14px;color:var(--txt2);
+  line-height:1.8;
+  max-width:480px;
+  margin-left:auto;margin-right:auto;
+}
+
+/* areas grid */
+.areas-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:32px;
+}
+.area-card{
+  background:var(--surf);
+  border:0.5px solid var(--bord);
+  border-radius:14px;
+  padding:16px;
+}
+.area-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+.area-name{font-size:13px;font-weight:500;color:var(--txt);margin-bottom:6px;}
+.area-bar-wrap{height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;}
+.area-bar{height:100%;border-radius:2px;transition:width 1.2s cubic-bezier(.22,1,.36,1);}
+.area-desc{font-size:11px;color:var(--txt3);margin-top:8px;line-height:1.5;}
+
+/* top aspects */
+.aspects-section{margin-top:28px;}
+.section-title{
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--txt3);margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-title::after{content:'';flex:1;height:0.5px;background:var(--bord);}
+
+.aspect-row{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px 14px;
+  background:var(--surf);
+  border:0.5px solid var(--bord);
+  border-radius:12px;
+  margin-bottom:8px;
+}
+.asp-sym{font-size:20px;flex-shrink:0;margin-top:1px;}
+.asp-planets{font-size:13px;font-weight:500;color:var(--txt);}
+.asp-type{font-size:11px;color:var(--txt3);margin-top:2px;}
+.asp-desc{font-size:12px;color:var(--txt2);margin-top:4px;line-height:1.5;}
+
+/* locked teaser */
+.locked-section{
+  margin-top:28px;
+  background:var(--surf);
+  border:0.5px solid var(--bord);
+  border-radius:20px;
+  padding:28px 24px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.locked-section::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 0%,rgba(8,6,18,0.85) 60%,var(--ink) 100%);
+  pointer-events:none;
+}
+.locked-items{filter:blur(3px);opacity:.5;pointer-events:none;}
+.locked-overlay{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:28px 24px;
+  text-align:center;
+}
+.lock-icon{font-size:28px;margin-bottom:10px;}
+.lock-title{
+  font-family:"Cormorant Garamond",serif;
+  font-size:22px;font-weight:400;
+  color:var(--txt);margin-bottom:6px;
+}
+.lock-sub{font-size:13px;color:var(--txt2);margin-bottom:20px;line-height:1.6;}
+.lock-cta{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 28px;
+  background:linear-gradient(135deg,var(--rose),var(--plum));
+  border:none;border-radius:50px;
+  font-family:"DM Sans",sans-serif;
+  font-size:15px;font-weight:500;
+  color:#fff;cursor:pointer;
+  text-decoration:none;
+  transition:opacity .2s;
+}
+.lock-cta:hover{opacity:.85;}
+
+/* ── FEATURES / SCREENSHOTS ── */
+#features{
+  padding:100px 24px;
+  max-width:1100px;
+  margin:0 auto;
+}
+.features-header{
+  text-align:center;margin-bottom:72px;
+}
+.feat-eyebrow{
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--txt3);margin-bottom:16px;
+}
+.feat-title{
+  font-family:"Cormorant Garamond",serif;
+  font-size:clamp(36px,5vw,56px);
+  font-weight:300;line-height:1.1;
+  color:var(--txt);
+}
+.feat-title em{font-style:italic;color:var(--rose-m);}
+
+.feat-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:24px;
+}
+.feat-item{
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;
+}
+.phone-frame{
+  position:relative;
+  width:100%;
+  max-width:220px;
+  margin:0 auto 20px;
+}
+.phone-img{
+  width:100%;
+  border-radius:28px;
+  box-shadow:0 20px 60px rgba(0,0,0,.5), 0 0 0 0.5px rgba(242,238,249,0.08);
+  display:block;
+  transition:transform .3s;
+}
+.feat-item:hover .phone-img{transform:translateY(-6px);}
+.feat-name{
+  font-family:"Cormorant Garamond",serif;
+  font-size:20px;font-weight:400;
+  color:var(--txt);margin-bottom:6px;
+}
+.feat-desc{font-size:13px;color:var(--txt2);line-height:1.6;max-width:200px;}
+
+/* locked badge on screenshot */
+.phone-locked-badge{
+  position:absolute;top:12px;right:12px;
+  background:rgba(8,6,18,0.8);
+  border:0.5px solid var(--bord2);
+  border-radius:50px;
+  padding:4px 10px;
+  font-size:10px;color:var(--gold);
+  display:flex;align-items:center;gap:4px;
+  backdrop-filter:blur(8px);
+}
+
+/* ── FINAL CTA ── */
+#finalcta{
+  padding:100px 24px;
+  text-align:center;
+  max-width:640px;
+  margin:0 auto;
+}
+.fcta-title{
+  font-family:"Cormorant Garamond",serif;
+  font-size:clamp(36px,5vw,58px);
+  font-weight:300;line-height:1.1;
+  color:var(--txt);margin-bottom:16px;
+}
+.fcta-title em{font-style:italic;color:var(--rose-m);}
+.fcta-sub{font-size:15px;color:var(--txt2);line-height:1.7;margin-bottom:40px;}
+.play-btn{
+  display:inline-flex;align-items:center;gap:12px;
+  padding:16px 32px;
+  background:var(--txt);
+  border-radius:16px;
+  text-decoration:none;
+  transition:opacity .2s,transform .1s;
+}
+.play-btn:hover{opacity:.9;transform:translateY(-2px);}
+.play-btn svg{width:24px;height:24px;flex-shrink:0;}
+.play-btn-text{text-align:left;}
+.play-btn-sub{font-size:10px;color:#333;letter-spacing:.5px;}
+.play-btn-name{font-size:16px;font-weight:600;color:#111;}
+
+/* ── FOOTER ── */
+footer{
+  border-top:0.5px solid var(--bord);
+  padding:32px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:relative;z-index:1;
+}
+.footer-logo{
+  font-family:"Cormorant Garamond",serif;
+  font-size:22px;font-weight:300;color:var(--txt3);
+  text-decoration:none;
+}
+.footer-logo em{font-style:italic;}
+.footer-links{display:flex;gap:24px;}
+.footer-links a{font-size:12px;color:var(--txt3);text-decoration:none;transition:color .2s;}
+.footer-links a:hover{color:var(--txt2);}
+
+/* ── DIVIDER ── */
+.starline{
+  display:flex;align-items:center;gap:16px;
+  max-width:200px;margin:60px auto;
+  opacity:.3;
+}
+.starline::before,.starline::after{content:'';flex:1;height:.5px;background:var(--txt3);}
+
+/* ── FAQ ── */
+#faq{padding:100px 24px;}
+.faq-inner{max-width:720px;margin:0 auto;}
+.faq-header{text-align:center;margin-bottom:56px;}
+.faq-item{
+  border-bottom:0.5px solid var(--bord);
+}
+.faq-q{
+  width:100%;background:none;border:none;
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:16px;
+  padding:20px 0;
+  font-family:"DM Sans",sans-serif;
+  font-size:15px;font-weight:400;
+  color:var(--txt);
+  cursor:pointer;
+  text-align:left;
+  transition:color .2s;
+}
+.faq-q:hover{color:var(--rose-m);}
+.faq-icon{
+  flex-shrink:0;
+  width:22px;height:22px;
+  border-radius:50%;
+  border:0.5px solid var(--bord2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:var(--txt3);
+  transition:transform .3s,background .2s;
+  margin-top:1px;
+}
+.faq-item.open .faq-icon{
+  transform:rotate(45deg);
+  background:var(--rose-l);
+  border-color:rgba(201,75,114,0.4);
+  color:var(--rose-m);
+}
+.faq-a{
+  max-height:0;overflow:hidden;
+  transition:max-height .35s cubic-bezier(.22,1,.36,1),padding .25s;
+  padding:0;
+}
+.faq-item.open .faq-a{
+  max-height:300px;
+  padding-bottom:20px;
+}
+.faq-a-inner{
+  font-size:14px;color:var(--txt2);
+  line-height:1.8;
+  padding-right:38px;
+}
+.faq-a-inner a{color:var(--rose-m);text-decoration:none;}
+.faq-a-inner a:hover{text-decoration:underline;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  nav{padding:14px 20px;}
+  .nav-logo{font-size:22px;}
+  .persons-wrap{grid-template-columns:1fr;gap:12px;}
+  .connector-col{margin-top:0;padding:4px 0;}
+  .conn-icon{width:32px;height:32px;font-size:14px;}
+  .feat-grid{grid-template-columns:1fr 1fr;gap:16px;}
+  .areas-grid{grid-template-columns:1fr;}
+  footer{flex-direction:column;gap:16px;text-align:center;}
+  .footer-links{flex-wrap:wrap;justify-content:center;}
+}
+@media(max-width:480px){
+  .feat-grid{grid-template-columns:1fr 1fr;}
+  .phone-frame{max-width:150px;}
+}
+</style>
+</head>
+<body>
+
+<!-- Stars -->
+<div id="stars"><canvas id="starsCanvas"></canvas></div>
+
+<!-- Nav -->
+<nav>
+  <a class="nav-logo" href="#">Duu<em>al</em></a>
+  <div class="nav-right">
+    <div class="nav-lang">
+      <button class="nl on" onclick="setLang('es',this)">ES</button>
+      <button class="nl" onclick="setLang('en',this)">EN</button>
+    </div>
+    <a class="nav-cta" href="https://play.google.com/store/apps/details?id=com.duual.app" target="_blank" id="navCtaBtn">Descargar app</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <div class="hero-eyebrow">✦ <span data-es="Motor Astronómico Real" data-en="Real Astronomical Engine">Motor Astronómico Real</span></div>
+  <h1 class="hero-title">
+    <span data-es="¿Cuánto se alinean<br>tus planetas<br>con los <em>suyos</em>?" data-en="How well do your<br>planets align<br>with <em>theirs</em>?">¿Cuánto se alinean<br>tus planetas<br>con los <em>suyos</em>?</span>
+  </h1>
+  <p class="hero-sub" data-es="No es signo solar. No es horóscopo genérico. Es compatibilidad real calculada con tu carta natal completa." data-en="Not sun signs. Not generic horoscopes. Real compatibility calculated from your full natal chart.">No es signo solar. No es horóscopo genérico. Es compatibilidad real calculada con tu carta natal completa.</p>
+  <div class="hero-arrow" onclick="document.getElementById('calc').scrollIntoView({behavior:'smooth'})">↓</div>
+</section>
+
+<!-- Calculator -->
+<section id="calc">
+  <div class="calc-label" data-es="✦ Calcula tu compatibilidad gratis" data-en="✦ Calculate your compatibility for free">✦ Calcula tu compatibilidad gratis</div>
+
+  <div class="persons-wrap">
+    <!-- Person A -->
+    <div class="person-card">
+      <div class="person-header">
+        <span class="person-dot pa-dot"></span>
+        <span data-es="PRIMERA PERSONA" data-en="FIRST PERSON">PRIMERA PERSONA</span>
+      </div>
+      <input class="finput" id="nameA" type="text" placeholder="Nombre" autocomplete="off">
+      <label class="finput-label" data-es="Fecha de nacimiento" data-en="Date of birth">Fecha de nacimiento</label>
+      <input class="finput" id="dateA" type="date">
+      <label class="finput-label" data-es="Hora (opcional)" data-en="Time (optional)">Hora (opcional)</label>
+      <input class="finput" id="timeA" type="time">
+      <p class="time-hint" data-es="Sin hora exacta usamos mediodía. Para mayor precisión ingresa la hora real." data-en="Without an exact time we use noon. For higher precision enter the real birth time.">Sin hora exacta usamos mediodía.</p>
+    </div>
+
+    <!-- Connector -->
+    <div class="connector-col">
+      <div class="conn-icon">♡</div>
+    </div>
+
+    <!-- Person B -->
+    <div class="person-card">
+      <div class="person-header">
+        <span class="person-dot pb-dot"></span>
+        <span data-es="SEGUNDA PERSONA" data-en="SECOND PERSON">SEGUNDA PERSONA</span>
+      </div>
+      <input class="finput" id="nameB" type="text" placeholder="Nombre" autocomplete="off">
+      <label class="finput-label" data-es="Fecha de nacimiento" data-en="Date of birth">Fecha de nacimiento</label>
+      <input class="finput" id="dateB" type="date">
+      <label class="finput-label" data-es="Hora (opcional)" data-en="Time (optional)">Hora (opcional)</label>
+      <input class="finput" id="timeB" type="time">
+      <p class="time-hint" data-es="Sin hora exacta usamos mediodía. Para mayor precisión ingresa la hora real." data-en="Without an exact time we use noon. For higher precision enter the real birth time.">Sin hora exacta usamos mediodía.</p>
+    </div>
+  </div>
+
+  <button class="calc-cta" id="calcBtn" onclick="runCalc()">
+    <span data-es="✦ Calcular compatibilidad" data-en="✦ Calculate compatibility">✦ Calcular compatibilidad</span>
+  </button>
+</section>
+
+<!-- Loading -->
+<div id="loadingWrap">
+  <div class="orbit">
+    <div class="oring or1"></div>
+    <div class="oring or2"></div>
+    <div class="oring or3"></div>
+    <div class="ocen"></div>
+    <div class="opl op1"></div>
+    <div class="opl op2"></div>
+  </div>
+  <div class="load-text" data-es="Leyendo las cartas..." data-en="Reading the charts...">Leyendo las cartas...</div>
+  <div class="load-dots"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div>
+</div>
+
+<!-- Result -->
+<div id="resultWrap">
+  <!-- Score hero -->
+  <div class="result-hero">
+    <svg style="position:absolute;width:0;height:0">
+      <defs>
+        <linearGradient id="sGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#C94B72"/>
+          <stop offset="100%" stop-color="#6B63CC"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <div class="score-container">
+      <svg class="score-svg" viewBox="0 0 200 200">
+        <circle class="score-track" cx="100" cy="100" r="85"/>
+        <circle class="score-prog" id="scoreCircle" cx="100" cy="100" r="85" stroke-dasharray="534" stroke-dashoffset="534"/>
+      </svg>
+      <div class="big-score" id="bigScore">0<span class="pct">%</span></div>
+    </div>
+    <div class="result-pair" id="resultPair"></div>
+    <div class="verdict-badge" id="verdictBadge"></div>
+    <p class="verdict-text" id="verdictText"></p>
+  </div>
+
+  <!-- Areas -->
+  <div class="areas-grid" id="areasGrid"></div>
+
+  <!-- Top aspects -->
+  <div class="aspects-section">
+    <div class="section-title" data-es="TUS ASPECTOS PRINCIPALES" data-en="YOUR MAIN ASPECTS">TUS ASPECTOS PRINCIPALES</div>
+    <div id="aspectsList"></div>
+  </div>
+
+  <!-- Locked deeper analysis -->
+  <div class="locked-section">
+    <div class="locked-items" id="lockedPreview"></div>
+    <div class="locked-overlay">
+      <div class="lock-icon">🔮</div>
+      <div class="lock-title" data-es="El análisis completo te espera" data-en="Your complete analysis awaits">El análisis completo te espera</div>
+      <p class="lock-sub" id="lockSubText"></p>
+      <a class="lock-cta" href="https://play.google.com/store/apps/details?id=com.duual.app" target="_blank">
+        <span data-es="Descargar Duual gratis" data-en="Download Duual free">Descargar Duual gratis</span> →
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Starline divider -->
+<div class="starline">✦</div>
+
+<!-- Features / Screenshots -->
+<section id="features">
+  <div class="features-header">
+    <div class="feat-eyebrow" data-es="LO QUE DESBLOQUEAS EN LA APP" data-en="WHAT YOU UNLOCK IN THE APP">LO QUE DESBLOQUEAS EN LA APP</div>
+    <h2 class="feat-title">
+      <span data-es="Mucho más que<br>un <em>número</em>" data-en="Much more than<br>a <em>number</em>">Mucho más que<br>un <em>número</em></span>
+    </h2>
+  </div>
+
+  <div class="feat-grid">
+    <div class="feat-item">
+      <div class="phone-frame">
+        <img class="phone-img" src="https://raw.githubusercontent.com/lupitascreations01-cmd/astrae/main/assets/screenshots/3.png" alt="Análisis por planeta" onerror="this.style.background='rgba(255,255,255,0.03)';this.style.height='400px';">
+        <div class="phone-locked-badge">✦ <span data-es="Premium" data-en="Premium">Premium</span></div>
+      </div>
+      <div class="feat-name" data-es="Análisis por Planeta" data-en="Analysis by Planet">Análisis por Planeta</div>
+      <p class="feat-desc" data-es="Venus, Marte, Luna, Sol y más. Qué significa cada posición en tu relación." data-en="Venus, Mars, Moon, Sun and more. What each position means in your relationship.">Venus, Marte, Luna, Sol y más. Qué significa cada posición en tu relación.</p>
+    </div>
+    <div class="feat-item">
+      <div class="phone-frame">
+        <img class="phone-img" src="https://raw.githubusercontent.com/lupitascreations01-cmd/astrae/main/assets/screenshots/2.png" alt="Carta natal" onerror="this.style.background='rgba(255,255,255,0.03)';this.style.height='400px';">
+        <div class="phone-locked-badge">✦ <span data-es="Premium" data-en="Premium">Premium</span></div>
+      </div>
+      <div class="feat-name" data-es="Carta Natal Visual" data-en="Visual Natal Chart">Carta Natal Visual</div>
+      <p class="feat-desc" data-es="Tu carta natal interactiva. Pregúntale directamente a la IA qué significa cada planeta." data-en="Your interactive natal chart. Ask the AI directly what each planet means.">Tu carta natal interactiva. Pregúntale directamente a la IA qué significa cada planeta.</p>
+    </div>
+    <div class="feat-item">
+      <div class="phone-frame">
+        <img class="phone-img" src="https://raw.githubusercontent.com/lupitascreations01-cmd/astrae/main/assets/screenshots/4.png" alt="Tarjeta compartible" onerror="this.style.background='rgba(255,255,255,0.03)';this.style.height='400px';">
+      </div>
+      <div class="feat-name" data-es="Comparte tu resultado" data-en="Share your result">Comparte tu resultado</div>
+      <p class="feat-desc" data-es="Genera una imagen única con tu compatibilidad para compartir en redes." data-en="Generate a unique image with your compatibility to share on social.">Genera una imagen única con tu compatibilidad para compartir en redes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="faq-inner">
+    <div class="faq-header">
+      <div class="feat-eyebrow" data-es="PREGUNTAS FRECUENTES" data-en="FREQUENTLY ASKED QUESTIONS">PREGUNTAS FRECUENTES</div>
+      <h2 class="feat-title">
+        <span data-es="Todo lo que<br>necesitas <em>saber</em>" data-en="Everything you<br>need to <em>know</em>">Todo lo que<br>necesitas <em>saber</em></span>
+      </h2>
+    </div>
+    <div class="faq-list" id="faqList"></div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section id="finalcta">
+  <h2 class="fcta-title">
+    <span data-es="El problema no eras tú.<br>Era su <em>Venus en Acuario.</em>" data-en="It wasn't you.<br>It was their <em>Venus in Aquarius.</em>">El problema no eras tú.<br>Era su <em>Venus en Acuario.</em></span>
+  </h2>
+  <p class="fcta-sub" data-es="Descarga Duual y descubre qué dicen los planetas sobre tus relaciones. Análisis completo. Sin horóscopos genéricos." data-en="Download Duual and discover what the planets say about your relationships. Complete analysis. No generic horoscopes.">Descarga Duual y descubre qué dicen los planetas sobre tus relaciones. Análisis completo. Sin horóscopos genéricos.</p>
+  <a class="play-btn" href="https://play.google.com/store/apps/details?id=com.duual.app" target="_blank">
+    <svg viewBox="0 0 24 24" fill="none">
+      <path d="M3 20.5v-17c0-.83 1-.83 1.5-.5l15 8.5-15 8.5c-.5.33-1.5.33-1.5-.5z" fill="#222"/>
+      <path d="M3.5 3.5L13 12 3.5 20.5" stroke="#1a73e8" stroke-width="1.5"/>
+      <path d="M13 12L20.5 8" stroke="#ea4335" stroke-width="1.5"/>
+      <path d="M13 12L20.5 16" stroke="#34a853" stroke-width="1.5"/>
+      <path d="M3.5 3.5L13 12" stroke="#fbbc05" stroke-width="1.5"/>
+    </svg>
+    <div class="play-btn-text">
+      <div class="play-btn-sub">DISPONIBLE EN</div>
+      <div class="play-btn-name">Google Play</div>
+    </div>
+  </a>
+</section>
+
+<!-- Footer -->
+<footer>
+  <a class="footer-logo" href="#">Duu<em>al</em></a>
+  <div class="footer-links">
+    <a href="https://duual.app/privacy" data-es="Privacidad" data-en="Privacy">Privacidad</a>
+    <a href="https://play.google.com/store/apps/details?id=com.duual.app" target="_blank" data-es="Descargar" data-en="Download">Descargar</a>
+  </div>
+</footer>
+
+<script>
+/* ─── STARS ─── */
+(function(){
+  const c=document.getElementById('starsCanvas');
+  const ctx=c.getContext('2d');
+  let W,H,stars=[];
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;stars=Array.from({length:180},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.2+.2,a:Math.random(),s:Math.random()*.004+.001}));}
+  function draw(){ctx.clearRect(0,0,W,H);stars.forEach(s=>{s.a+=s.s;if(s.a>1||s.a<0)s.s*=-1;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(242,238,249,${s.a*.6})`;ctx.fill();});}
+  resize();window.addEventListener('resize',resize);
+  setInterval(draw,50);
+})();
+
+/* ─── LANG ─── */
+let lang='es';
+function setLang(l,btn){
+  lang=l;
+  document.querySelectorAll('.nl').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('[data-es]').forEach(el=>{
+    if(el.tagName==='INPUT')return;
+    const txt=el.getAttribute('data-'+l);
+    if(txt)el.innerHTML=txt;
+  });
+  document.querySelectorAll('input[placeholder]').forEach(el=>{
+    if(el.id.startsWith('name'))el.placeholder=l==='es'?'Nombre':'Name';
+  });
+  const navBtn=document.getElementById('navCtaBtn');
+  navBtn.textContent=l==='es'?'Descargar app':'Download app';
+}
+
+/* ─── ASTRO ENGINE (same as app) ─── */
+const DEG=Math.PI/180;
+const SIGN_ES=["Aries","Tauro","Géminis","Cáncer","Leo","Virgo","Libra","Escorpio","Sagitario","Capricornio","Acuario","Piscis"];
+const SIGN_EN=["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
+const SIGN_ELEM=["fire","earth","air","water","fire","earth","air","water","fire","earth","air","water"];
+const PES={Sun:"Sol",Moon:"Luna",Mercury:"Mercurio",Venus:"Venus",Mars:"Marte",Jupiter:"Júpiter",Saturn:"Saturno",Uranus:"Urano",Neptune:"Neptuno",Pluto:"Plutón",Chiron:"Quirón",NNode:"Nodo Norte"};
+const PEN={Sun:"Sun",Moon:"Moon",Mercury:"Mercury",Venus:"Venus",Mars:"Mars",Jupiter:"Jupiter",Saturn:"Saturn",Uranus:"Uranus",Neptune:"Neptune",Pluto:"Pluto",Chiron:"Chiron",NNode:"North Node"};
+const PG={Sun:"☀",Moon:"☽",Mercury:"☿",Venus:"♀",Mars:"♂",Jupiter:"♃",Saturn:"♄",Uranus:"⛢",Neptune:"♆",Pluto:"♇",Chiron:"⚷",NNode:"☊"};
+function n360(x){return((x%360)+360)%360;}
+function sinD(d){return Math.sin(d*DEG);}
+function jd(y,m,d){if(m<=2){y--;m+=12;}const A=Math.floor(y/100);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+2-A+Math.floor(A/4)-1524.5;}
+function T(y,m,d){return(jd(y,m,d)-2451545)/36525;}
+function sun(t){const L=n360(280.46646+36000.76983*t),M=n360(357.52911+35999.05029*t-0.0001537*t*t),C=(1.914602-0.004817*t)*sinD(M)+(0.019993-0.000101*t)*sinD(2*M)+0.000289*sinD(3*M);return n360(L+C);}
+function moon(t){const Mp=n360(134.96298+477198.867398*t+0.0086972*t*t),D=n360(297.85036+445267.111480*t),M=n360(357.52772+35999.050340*t),F=n360(93.27191+483202.017538*t);return n360(218.3165+481267.8813*t+6.289*sinD(Mp)-1.274*sinD(Mp-2*D)+0.658*sinD(2*D)-0.214*sinD(2*Mp)-0.186*sinD(M)-0.114*sinD(2*F)+0.059*sinD(2*Mp-2*D)+0.041*sinD(Mp-M));}
+function geoLon(hl,hr,el,er){const x=hr*Math.cos(hl*DEG)-er*Math.cos(el*DEG);const y=hr*Math.sin(hl*DEG)-er*Math.sin(el*DEG);return n360(Math.atan2(y,x)/DEG);}
+function earthPos(t){const M=n360(357.52911+35999.05029*t);return{l:n360(sun(t)+180),r:1.0-0.01671*Math.cos(M*DEG)};}
+function merc(t){const L=n360(252.250906+149472.6746358*t),M=n360(174.7948+149472.5153*t);const e2=0.20563;const hl=n360(L+(2*e2-0.25*e2*e2*e2)*sinD(M)+(1.25*e2*e2)*sinD(2*M)+(13/12*e2*e2*e2)*sinD(3*M));const hr=0.387098*(1-e2*e2)/(1+e2*Math.cos(M*DEG));const e=earthPos(t);return geoLon(hl,hr,e.l,e.r);}
+function venus(t){const L=n360(181.979801+58517.8156760*t),M=n360(212.2606+58517.8039*t);const e2=0.006773;const hl=n360(L+0.7758*sinD(M)+0.0033*sinD(2*M)-0.0235*sinD(M-n360(357.52911+35999.05029*t)));const hr=0.72333*(1-e2*e2)/(1+e2*Math.cos(M*DEG));const e=earthPos(t);return geoLon(hl,hr,e.l,e.r);}
+function mars(t){const L=n360(355.433+19140.2993*t),M=n360(19.373+19140.3023*t);const hl=n360(L+10.6912*sinD(M)+0.6228*sinD(2*M)+0.0503*sinD(3*M));const hr=1.52366*(1-0.09341*0.09341)/(1+0.09341*Math.cos(M*DEG));const e=earthPos(t);return geoLon(hl,hr,e.l,e.r);}
+function jupit(t){const L=n360(34.351519+3034.9056606*t),M=n360(20.9+3034.906*t);const hl=n360(L+5.5549*sinD(M)+0.1683*sinD(2*M));const hr=5.20336*(1-0.04839*0.04839)/(1+0.04839*Math.cos(M*DEG));const e=earthPos(t);return geoLon(hl,hr,e.l,e.r);}
+function saturn(t){const L=n360(50.077444+1222.1138488*t),M=n360(317.0207+1221.5515*t);const hl=n360(L+6.3585*sinD(M)+0.2204*sinD(2*M));const hr=9.53707*(1-0.05415*0.05415)/(1+0.05415*Math.cos(M*DEG));const e=earthPos(t);return geoLon(hl,hr,e.l,e.r);}
+function chiron(t){const hl=n360(208.67+0.01977*t*36525);const e=earthPos(t);return geoLon(hl,13.7,e.l,e.r);}
+function nnode(t){return n360(125.0445-1934.1363*t);}
+function planetsSimple(y,m,d,h){const t=T(y,m,d+(h||12)/24);return{Sun:sun(t),Moon:moon(t),Mercury:merc(t),Venus:venus(t),Mars:mars(t),Jupiter:jupit(t),Saturn:saturn(t),Chiron:chiron(t),NNode:nnode(t)};}
+function planetsPrecise(y,m,d,h){
+  try{
+    if(typeof Astronomy==='undefined')throw new Error('no lib');
+    const hour=h||12;
+    const date=new Date(Date.UTC(y,m-1,d,Math.floor(hour),Math.round((hour%1)*60),0));
+    const time=Astronomy.MakeTime(date);
+    const bodies=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn'];
+    const result={};
+    for(const body of bodies){const vec=Astronomy.GeoVector(body,time,true);const ecl=Astronomy.Ecliptic(vec);result[body]=n360(ecl.elon);}
+    const t=T(y,m,d+hour/24);result.Chiron=chiron(t);result.NNode=nnode(t);return result;
+  }catch(e){return planetsSimple(y,m,d,h);}
+}
+function signOf(deg){return Math.floor(n360(deg)/30);}
+function signFull(deg){return(lang==='es'?SIGN_ES:SIGN_EN)[signOf(deg)];}
+
+const ASPS=[
+  {es:"Conjunción",en:"Conjunction",s:"☌",a:0,o:8,sc:10,t:"harmonious"},
+  {es:"Sextil",en:"Sextile",s:"⚹",a:60,o:6,sc:6,t:"harmonious"},
+  {es:"Trígono",en:"Trine",s:"△",a:120,o:8,sc:9,t:"harmonious"},
+  {es:"Cuadratura",en:"Square",s:"□",a:90,o:7,sc:3,t:"tense"},
+  {es:"Oposición",en:"Opposition",s:"☍",a:180,o:8,sc:4,t:"tense"}
+];
+function asp(l1,l2){let d=Math.abs(l1-l2);if(d>180)d=360-d;for(const a of ASPS){const o=Math.abs(d-a.a);if(o<=a.o)return{...a,orbe:o.toFixed(1)};}return null;}
+const PW={"Sun-Moon":4,"Moon-Sun":4,"Venus-Mars":5,"Mars-Venus":5,"Sun-Venus":3,"Venus-Sun":3,"Sun-Sun":3,"Moon-Moon":3,"Mercury-Mercury":2,"Sun-Mercury":2,"Mercury-Sun":2,"Venus-Venus":2,"Mars-Mars":1,"Sun-Mars":2,"Mars-Sun":2,"Moon-Venus":2,"Venus-Moon":2,"Saturn-Sun":2,"Sun-Saturn":2,"Moon-Jupiter":1,"Jupiter-Moon":1,"Moon-Mars":2,"Mars-Moon":2,"Chiron-Sun":1,"Chiron-Moon":1,"NNode-Sun":1,"NNode-Venus":1};
+const AREAS={
+  romance:{es:"Romance",en:"Romance",pairs:["Venus-Mars","Mars-Venus","Sun-Venus","Venus-Sun","Venus-Venus"],c:"#C94B72"},
+  emotion:{es:"Vínculo emocional",en:"Emotional bond",pairs:["Sun-Moon","Moon-Sun","Moon-Moon","Moon-Venus","Venus-Moon"],c:"#1B9E78"},
+  comms:{es:"Comunicación",en:"Communication",pairs:["Mercury-Mercury","Sun-Mercury","Mercury-Sun"],c:"#6B63CC"},
+  longterm:{es:"Largo plazo",en:"Long-term",pairs:["Saturn-Sun","Sun-Saturn","Jupiter-Moon","Moon-Jupiter"],c:"#D4920E"}
+};
+const AI_SHORT={
+  romance:{es:[[80,"Atracción potente y natural."],[60,"Química presente con espacio para crecer."],[0,"La atracción requiere cultivo consciente."]],en:[[80,"Powerful, natural attraction."],[60,"Chemistry present with room to grow."],[0,"Attraction needs conscious nurturing."]]},
+  emotion:{es:[[80,"Se entienden emocionalmente sin esfuerzo."],[60,"Conexión emocional real con algunas diferencias."],[0,"Mundos emocionales distintos — enriquecedor si se trabaja."]],en:[[80,"You understand each other emotionally with ease."],[60,"Real emotional connection with some differences."],[0,"Different emotional worlds — enriching if worked through."]]},
+  comms:{es:[[80,"Comunicación fluida e intuitiva."],[60,"Se entienden bien en lo cotidiano."],[0,"Estilos distintos. Requiere paciencia."]],en:[[80,"Fluid, intuitive communication."],[60,"You understand each other well in daily life."],[0,"Different styles. Patience required."]]},
+  longterm:{es:[[80,"Bases sólidas para construir juntos."],[60,"Potencial de permanencia con trabajo."],[0,"La estabilidad hay que construirla activamente."]],en:[[80,"Solid foundations to build on together."],[60,"Potential for permanence with work."],[0,"Stability must be actively built."]]}
+};
+function aiScore(k,p){const t=AI_SHORT[k][lang];for(const[th,tx]of t)if(p>=th)return tx;return t[t.length-1][1];}
+
+const VRD={
+  es:[
+    [88,"✦ Escrito en las estrellas",["Los planetas no mienten: {A} y {B} tienen una de esas cartas que los astrólogos guardan en sus archivos para mostrar en clase. Raro. Real. Difícil de ignorar.","Hay compatibilidades que se explican y hay compatibilidades que simplemente se sienten. La de {A} y {B} es de las segundas — y los planetas lo confirman.","{A} y {B} no se conocieron por accidente. Sus cartas se complementan con una precisión que da algo de miedo. De la buena."]],
+    [75,"✦ Esto tiene futuro",["No es fuego de un solo verano. Lo que hay entre {A} y {B} es del tipo que madura — y los planetas sugieren que lo mejor todavía no llegó.","{A} y {B} tienen una química que no se explica en el primer mensaje. Sus cartas revelan capas — y cada capa que descubran va a valer la pena.","Los astros ven en {A} y {B} lo que a veces cuesta trabajo ver desde adentro: una conexión que crece, no que se gasta."]],
+    [60,"✦ Potencial con asterisco",["{A} y {B} tienen mucho a favor — y un par de planetas que van a requerir conversaciones incómodas. El tipo de conversaciones que o los rompe o los construye.","Los planetas ven compatibilidad real entre {A} y {B}. También ven que uno de los dos tiene Venus en un signo que no coopera fácil. Ya saben quién es.","No es un no. Es un 'depende de qué tanto quieran trabajarlo'. {A} y {B} tienen los ingredientes — la receta la tienen que escribir ellos."]],
+    [45,"✦ Intenso, pero no imposible",["Los planetas de {A} y {B} se miran con una intensidad que puede ser pasión o puede ser pelea — y a veces las dos cosas en la misma tarde.","Hay conexiones que te cambian aunque no duren. La de {A} y {B} es de esas. Si la trabajan con honestidad, lo que aprendan vale más que el score.","Los astros ven brillo y fricción en {A} y {B} en proporciones casi iguales. Spoiler: las relaciones más interesantes siempre tienen las dos cosas."]],
+    [0,"✦ El problema no eras tú",["Los planetas de {A} y {B} no se llevan bien en silencio — se llevan a gritos. No imposible, pero sí el tipo de relación que necesita mucha gasolina para avanzar.","¿Por qué costaba tanto entenderse con {B}? Los astros tienen una respuesta de 3 palabras: Saturno en cuadratura. No era culpa de nadie. Era el universo siendo inconveniente.","{A} y {B} llegaron a la relación con cartas que chocan en casi todo lo que importa. La buena noticia: al menos ahora tienen un culpable con nombre y signo zodiacal."]]
+  ],
+  en:[
+    [88,"✦ Written in the stars",["The planets don't lie: {A} and {B} have one of those charts astrologers keep on file to show in class. Rare. Real. Hard to ignore.","Some compatibilities can be explained. Others are just felt. {A} and {B}'s is the second kind — and the planets confirm it.","{A} and {B} didn't meet by accident. Their charts complement each other with a precision that's a little unsettling. The good kind."]],
+    [75,"✦ This has legs",["This isn't a one-summer fire. What {A} and {B} have is the kind that deepens — and the planets suggest the best part hasn't happened yet.","{A} and {B} have a chemistry that doesn't reveal itself in the first message. Their charts have layers — and every layer will be worth uncovering.","The stars see in {A} and {B} what's sometimes hard to see from the inside: a connection that grows, not one that burns out."]],
+    [60,"✦ Potential with an asterisk",["{A} and {B} have a lot going for them — and a couple of planets that are going to require uncomfortable conversations. The kind that either break you or build you.","The planets see real compatibility between {A} and {B}. They also see that one of them has Venus in a sign that doesn't cooperate easily. You know who you are.","It's not a no. It's a 'depends how much you both want to work for it.' {A} and {B} have the ingredients — the recipe is theirs to write."]],
+    [45,"✦ Intense, but not impossible",["{A} and {B}'s planets look at each other with an intensity that can be passion or conflict — and sometimes both on the same afternoon.","Some connections change you even when they don't last. {A} and {B}'s is one of those. Work it with honesty and what you learn will be worth more than the score.","The stars see almost equal parts brightness and friction in {A} and {B}. Spoiler: the most interesting relationships always have both."]],
+    [0,"✦ It wasn't you",["{A} and {B}'s planets don't clash quietly — they clash loudly. Not impossible, but the kind of relationship that needs a lot of fuel just to move forward.","Why was it so hard to understand {B}? The stars have a 3-word answer: Saturn in square. Nobody's fault. Just the universe being inconvenient.","{A} and {B} came to this with charts that clash on almost everything that matters. The upside: at least now you have a culprit with a name and a zodiac sign."]]
+  ]
+};
+function pickVerdict(pct,nA,nB){
+  const vList=VRD[lang];
+  const vE=vList.find(v=>pct>=v[0]);
+  const texts=vE[2];
+  const idx=pct%texts.length;
+  const text=texts[idx].replace(/{A}/g,nA).replace(/{B}/g,nB);
+  return[vE[1],text];
+}
+
+/* ─── CALC ─── */
+function parseDate(id){
+  const v=document.getElementById(id).value;
+  if(!v)return null;
+  const[y,m,d]=v.split('-').map(Number);
+  return{y,m,d};
+}
+function parseTime(id){
+  const v=document.getElementById(id).value;
+  if(!v)return null;
+  const[h,min]=v.split(':').map(Number);
+  return h+min/60;
+}
+
+function runCalc(){
+  const dA=parseDate('dateA'),dB=parseDate('dateB');
+  const nA=(document.getElementById('nameA').value.trim()||'A').split(' ')[0];
+  const nB=(document.getElementById('nameB').value.trim()||'B').split(' ')[0];
+  if(!dA||!dB){
+    alert(lang==='es'?'Por favor ingresa las fechas de nacimiento.':'Please enter both birth dates.');
+    return;
+  }
+  const tA=parseTime('timeA'),tB=parseTime('timeB');
+
+  // hide calc, show loading
+  document.getElementById('calc').style.display='none';
+  const lw=document.getElementById('loadingWrap');
+  lw.style.display='flex';
+  document.getElementById('resultWrap').style.display='none';
+
+  setTimeout(()=>{
+    const pA=planetsPrecise(dA.y,dA.m,dA.d,tA);
+    const pB=planetsPrecise(dB.y,dB.m,dB.d,tB);
+    const result=calcCompat(pA,pB,nA,nB);
+    lw.style.display='none';
+    renderResult(result,pA,pB,nA,nB);
+  },1800);
+}
+
+function calcCompat(pA,pB,nA,nB){
+  const keys=["Sun","Moon","Mercury","Venus","Mars","Jupiter","Saturn","Chiron","NNode"];
+  let found=[],total=0;
+  for(const pa of keys)for(const pb of keys){
+    const k=`${pa}-${pb}`,w=PW[k]||0;
+    if(!w)continue;
+    const a=asp(pA[pa],pB[pb]);
+    if(a){total+=a.sc*w;found.push({pa,pb,a,pts:a.sc*w});}
+  }
+  const maxFound=found.reduce((s,x)=>s+ASPS[0].sc*(PW[x.pa+"-"+x.pb]||1),0)||1;
+  const rawPct=total/maxFound*100;
+  const harm=found.filter(x=>x.a.t==="harmonious").reduce((s,x)=>s+x.pts,0);
+  const tense=found.filter(x=>x.a.t==="tense").reduce((s,x)=>s+x.pts,0);
+  const totalFound=harm+tense||1;
+  const harmRatio=harm/totalFound;
+  const rawBalance=rawPct*0.6+harmRatio*40;
+  const pct=Math.min(97,Math.max(8,Math.round(rawBalance)));
+  return{pct,found,pA,pB,nA,nB};
+}
+
+function areaScore(found,pairs){
+  const rel=found.filter(x=>pairs.includes(`${x.pa}-${x.pb}`));
+  if(!rel.length)return 50;
+  const harm=rel.filter(x=>x.a.t==="harmonious").length;
+  return Math.round((harm/rel.length)*100);
+}
+
+function renderResult(r,pA,pB,nA,nB){
+  const{pct,found}=r;
+  const[vTitle,vText]=pickVerdict(pct,nA,nB);
+
+  // score ring
+  const circumference=2*Math.PI*85;
+  const offset=circumference-(pct/100)*circumference;
+  document.getElementById('bigScore').innerHTML=`${pct}<span class="pct">%</span>`;
+  const prog=document.getElementById('scoreCircle');
+  prog.style.strokeDasharray=circumference;
+  prog.style.strokeDashoffset=circumference;
+  setTimeout(()=>{prog.style.strokeDashoffset=offset;},100);
+
+  document.getElementById('resultPair').innerHTML=`${nA} <em>&</em> ${nB}`;
+  document.getElementById('verdictBadge').textContent=vTitle;
+  document.getElementById('verdictText').textContent=vText;
+
+  // areas
+  const ag=document.getElementById('areasGrid');
+  ag.innerHTML='';
+  Object.entries(AREAS).forEach(([k,area])=>{
+    const sc=areaScore(found,area.pairs);
+    const name=area[lang];
+    const desc=aiScore(k,sc);
+    ag.innerHTML+=`
+      <div class="area-card">
+        <div class="area-label" style="color:${area.c}">${name}</div>
+        <div class="area-name">${sc}%</div>
+        <div class="area-bar-wrap"><div class="area-bar" style="width:0%;background:${area.c}" data-w="${sc}"></div></div>
+        <div class="area-desc">${desc}</div>
+      </div>`;
+  });
+  setTimeout(()=>{document.querySelectorAll('.area-bar').forEach(b=>{b.style.width=b.dataset.w+'%';});},150);
+
+  // top aspects (show max 3 harmonious)
+  const al=document.getElementById('aspectsList');
+  al.innerHTML='';
+  const topH=found.filter(x=>x.a.t==="harmonious").sort((a,b)=>b.pts-a.pts).slice(0,2);
+  const topT=found.filter(x=>x.a.t==="tense").sort((a,b)=>b.pts-a.pts).slice(0,1);
+  const show=[...topH,...topT];
+  const pname=lang==='es'?PES:PEN;
+  show.forEach(x=>{
+    const col=x.a.t==='harmonious'?'#3DB88A':'#ED93B1';
+    const aspName=lang==='es'?x.a.es:x.a.en;
+    al.innerHTML+=`
+      <div class="aspect-row" style="border-left:2px solid ${col}">
+        <div class="asp-sym" style="color:${col}">${x.a.s}</div>
+        <div>
+          <div class="asp-planets">${PG[x.pa]||''} ${pname[x.pa]||x.pa} ${x.a.s} ${PG[x.pb]||''} ${pname[x.pb]||x.pb}</div>
+          <div class="asp-type" style="color:${col}">${aspName} · ${lang==='es'?'orbe':'orb'} ${x.a.orbe}°</div>
+        </div>
+      </div>`;
+  });
+
+  // locked preview content
+  const venusA=signFull(pA.Venus);
+  const marsB=signFull(pB.Mars);
+  const lockSub=lang==='es'
+    ?`Venus de ${nA} en ${venusA}. Marte de ${nB} en ${signFull(pB.Mars)}. Más aspectos, interpretación IA, análisis completo por planeta y recomendaciones personalizadas.`
+    :`${nA}'s Venus in ${venusA}. ${nB}'s Mars in ${signFull(pB.Mars)}. More aspects, AI interpretation, full planet-by-planet analysis and personalized recommendations.`;
+  document.getElementById('lockSubText').textContent=lockSub;
+
+  document.getElementById('lockedPreview').innerHTML=`
+    <div style="font-size:12px;color:rgba(242,238,249,0.3);margin-bottom:8px">♀ Venus · ♂ Marte · ☀ Sol · ☽ Luna · ☿ Mercurio</div>
+    <div style="height:60px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:8px;"></div>
+    <div style="height:40px;background:rgba(255,255,255,0.03);border-radius:8px;"></div>`;
+
+  document.getElementById('resultWrap').style.display='block';
+  document.getElementById('resultWrap').scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+<!-- FAQ Schema for LLMs & Google -->
+<script type="application/ld+json" id="faqSchema"></script>
+
+<script>
+/* ─── FAQ DATA ─── */
+const FAQS = [
+  {
+    es: {
+      q: "¿Duual es gratis?",
+      a: "Duual tiene una versión gratuita que incluye el cálculo de compatibilidad con score general y veredicto. El análisis completo — por planeta, interpretación con IA, carta natal interactiva y tarjeta compartible — requiere suscripción Premium ($4.99/mes o $29.99/año)."
+    },
+    en: {
+      q: "Is Duual free?",
+      a: "Duual has a free version that includes the compatibility calculation with overall score and verdict. The full analysis — by planet, AI interpretation, interactive natal chart and shareable card — requires a Premium subscription ($4.99/month or $29.99/year)."
+    }
+  },
+  {
+    es: {
+      q: "¿Cómo calcula Duual la compatibilidad?",
+      a: "Duual usa un motor astronómico real para calcular las posiciones planetarias exactas en tu fecha y hora de nacimiento. Luego analiza los aspectos entre las cartas de ambas personas — conjunciones, trígonos, sextiles, cuadraturas y oposiciones — con pesos por importancia astrológica. El resultado no es un horóscopo genérico por signo solar: es sinastría real."
+    },
+    en: {
+      q: "How does Duual calculate compatibility?",
+      a: "Duual uses a real astronomical engine to calculate the exact planetary positions at your birth date and time. It then analyzes the aspects between both people's charts — conjunctions, trines, sextiles, squares and oppositions — weighted by astrological importance. The result is not a generic sun-sign horoscope: it's real synastry."
+    }
+  },
+  {
+    es: {
+      q: "¿Qué es la sinastría?",
+      a: "La sinastría es la técnica astrológica que compara las cartas natales de dos personas para entender su dinámica de relación. Analiza cómo los planetas de una persona interactúan con los de la otra. Es mucho más precisa que comparar solo signos solares, porque considera la posición exacta de todos los planetas en el momento del nacimiento."
+    },
+    en: {
+      q: "What is synastry?",
+      a: "Synastry is the astrological technique that compares two people's natal charts to understand their relationship dynamic. It analyzes how one person's planets interact with the other's. It's far more precise than comparing sun signs alone, because it considers the exact position of all planets at the moment of birth."
+    }
+  },
+  {
+    es: {
+      q: "¿Necesito saber la hora exacta de nacimiento?",
+      a: "La hora de nacimiento mejora la precisión, especialmente para la posición de la Luna (que se mueve rápido) y el Ascendente. Si no la sabes, Duual usa el mediodía como aproximación y te muestra un disclaimer. El resultado sigue siendo útil — solo puede variar algunos grados en planetas rápidos."
+    },
+    en: {
+      q: "Do I need to know my exact birth time?",
+      a: "Birth time improves precision, especially for the Moon's position (which moves quickly) and the Ascendant. If you don't know it, Duual uses noon as an approximation and shows a disclaimer. The result is still useful — it may only vary a few degrees for fast-moving planets."
+    }
+  },
+  {
+    es: {
+      q: "¿Duual funciona para amistades o solo parejas románticas?",
+      a: "Duual funciona para cualquier tipo de relación: romántica, de amistad, familiar o profesional. La sinastría describe dinámicas de relación en general — el contexto lo pones tú."
+    },
+    en: {
+      q: "Does Duual work for friendships or only romantic partners?",
+      a: "Duual works for any type of relationship: romantic, friendship, family or professional. Synastry describes relationship dynamics in general — you provide the context."
+    }
+  },
+  {
+    es: {
+      q: "¿Qué diferencia a Duual de Co-Star o The Pattern?",
+      a: "Duual está enfocado en la compatibilidad entre dos personas, no en el análisis individual. A diferencia de Co-Star, Duual usa un motor astronómico propio (no depende de APIs externas), es bilingüe español/inglés, y está diseñado específicamente para el mercado latinoamericano. No da predicciones diarias — da análisis de relación profundo."
+    },
+    en: {
+      q: "What makes Duual different from Co-Star or The Pattern?",
+      a: "Duual is focused on compatibility between two people, not individual analysis. Unlike Co-Star, Duual uses its own astronomical engine (not dependent on external APIs), is bilingual in Spanish/English, and is specifically designed for the Latin American market. It doesn't give daily predictions — it gives deep relationship analysis."
+    }
+  },
+  {
+    es: {
+      q: "¿Qué incluye Duual Premium?",
+      a: "Premium incluye: análisis completo de compatibilidad por planeta (Venus, Marte, Sol, Luna, Mercurio, Saturno y más), interpretación con inteligencia artificial, carta natal interactiva donde puedes preguntarle a la IA sobre cada planeta, historial de análisis guardados, tarjeta compartible con tu resultado, y sin límite de análisis."
+    },
+    en: {
+      q: "What does Duual Premium include?",
+      a: "Premium includes: full compatibility analysis by planet (Venus, Mars, Sun, Moon, Mercury, Saturn and more), AI-powered interpretation, interactive natal chart where you can ask the AI about each planet, saved analysis history, shareable card with your result, and unlimited analyses."
+    }
+  },
+  {
+    es: {
+      q: "¿La IA de Duual usa ChatGPT?",
+      a: "Duual usa la API de Anthropic (Claude) para las interpretaciones astrológicas. Los cálculos planetarios son propios — no dependemos de IA para los datos astronómicos, solo para las interpretaciones en lenguaje natural."
+    },
+    en: {
+      q: "Does Duual's AI use ChatGPT?",
+      a: "Duual uses Anthropic's API (Claude) for astrological interpretations. The planetary calculations are our own — we don't rely on AI for astronomical data, only for natural language interpretations."
+    }
+  },
+  {
+    es: {
+      q: "¿En qué idiomas está disponible Duual?",
+      a: "Duual está completamente disponible en español e inglés. Puedes cambiar el idioma en cualquier momento desde la pantalla principal. Toda la interfaz, los análisis y las interpretaciones de IA están en ambos idiomas."
+    },
+    en: {
+      q: "What languages is Duual available in?",
+      a: "Duual is fully available in Spanish and English. You can switch languages at any time from the main screen. The entire interface, analyses and AI interpretations are in both languages."
+    }
+  },
+  {
+    es: {
+      q: "¿Mis datos de nacimiento están seguros?",
+      a: "Duual no requiere registro ni cuenta para usar la calculadora. Los datos de nacimiento que ingresas se usan únicamente para el cálculo y no se almacenan en servidores. Puedes revisar nuestra política de privacidad en duual.app/privacy."
+    },
+    en: {
+      q: "Is my birth data safe?",
+      a: "Duual doesn't require registration or an account to use the calculator. The birth data you enter is used only for the calculation and is not stored on servers. You can review our privacy policy at duual.app/privacy."
+    }
+  },
+  {
+    es: {
+      q: "¿En qué países está disponible Duual?",
+      a: "Duual está disponible en Google Play en 177 países. El foco principal es Latinoamérica y España, pero la versión en inglés está disponible para cualquier usuario."
+    },
+    en: {
+      q: "In which countries is Duual available?",
+      a: "Duual is available on Google Play in 177 countries. The main focus is Latin America and Spain, but the English version is available to any user."
+    }
+  },
+  {
+    es: {
+      q: "¿Qué es Venus en Acuario y por qué importa en compatibilidad?",
+      a: "Venus es el planeta del amor, los valores y la atracción. Su signo indica cómo una persona da y recibe afecto. Venus en Acuario tiende a amar con independencia, de forma intelectual y a veces con distancia emocional. En compatibilidad, el signo de Venus de cada persona revela si sus estilos de amor son complementarios o generan fricción."
+    },
+    en: {
+      q: "What is Venus in Aquarius and why does it matter for compatibility?",
+      a: "Venus is the planet of love, values and attraction. Its sign indicates how a person gives and receives affection. Venus in Aquarius tends to love with independence, intellectually and sometimes with emotional distance. In compatibility, each person's Venus sign reveals whether their love styles are complementary or create friction."
+    }
+  },
+  {
+    es: {
+      q: "¿Cuál es el score máximo de compatibilidad en Duual?",
+      a: "El score máximo real es 97%. Duual no usa un piso artificial de 50% — el rango real va de 8% a 97%, dependiendo de los aspectos encontrados entre las cartas. Un score bajo no significa que la relación sea mala, sino que requiere más trabajo consciente."
+    },
+    en: {
+      q: "What's the maximum compatibility score in Duual?",
+      a: "The real maximum score is 97%. Duual doesn't use an artificial floor of 50% — the real range goes from 8% to 97%, depending on the aspects found between the charts. A low score doesn't mean the relationship is bad, just that it requires more conscious work."
+    }
+  },
+  {
+    es: {
+      q: "¿Puedo cancelar el Premium en cualquier momento?",
+      a: "Sí. La suscripción Premium se gestiona directamente desde Google Play. Puedes cancelarla en cualquier momento desde la configuración de suscripciones de tu cuenta de Google, sin penalidades."
+    },
+    en: {
+      q: "Can I cancel Premium at any time?",
+      a: "Yes. The Premium subscription is managed directly through Google Play. You can cancel at any time from your Google account subscription settings, with no penalties."
+    }
+  },
+  {
+    es: {
+      q: "¿Qué es un aspecto astrológico?",
+      a: "Un aspecto es el ángulo entre dos planetas en la carta natal. Los aspectos armónicos (trígono 120°, sextil 60°) indican flujo y facilidad. Los aspectos tensos (cuadratura 90°, oposición 180°) indican fricción y crecimiento. La conjunción (0°) puede ser armónica o tensa dependiendo de los planetas involucrados. Duual analiza los aspectos entre las cartas de dos personas para calcular la compatibilidad."
+    },
+    en: {
+      q: "What is an astrological aspect?",
+      a: "An aspect is the angle between two planets in the natal chart. Harmonious aspects (trine 120°, sextile 60°) indicate flow and ease. Tense aspects (square 90°, opposition 180°) indicate friction and growth. The conjunction (0°) can be harmonious or tense depending on the planets involved. Duual analyzes aspects between two people's charts to calculate compatibility."
+    }
+  },
+  {
+    es: {
+      q: "¿Funciona Duual sin conexión a internet?",
+      a: "El cálculo astronómico básico funciona sin conexión. Las interpretaciones con IA requieren internet. Para la experiencia completa recomendamos tener conexión."
+    },
+    en: {
+      q: "Does Duual work offline?",
+      a: "The basic astronomical calculation works offline. AI interpretations require internet. For the full experience we recommend having a connection."
+    }
+  },
+  {
+    es: {
+      q: "¿Duual tiene versión para iPhone?",
+      a: "Por ahora Duual está disponible solo en Android (Google Play). La versión para iOS está en planes futuros."
+    },
+    en: {
+      q: "Is there an iPhone version of Duual?",
+      a: "For now Duual is available only on Android (Google Play). An iOS version is in future plans."
+    }
+  },
+  {
+    es: {
+      q: "¿Qué hace diferente al 'motor astronómico real' de Duual?",
+      a: "La mayoría de apps de astrología calculan la compatibilidad solo con el signo solar (tu fecha de cumpleaños). Duual calcula la posición real de cada planeta — Sol, Luna, Mercurio, Venus, Marte, Júpiter, Saturno y más — usando algoritmos astronómicos precisos. Eso permite análisis de sinastría real, no generalidades por signo."
+    },
+    en: {
+      q: "What makes Duual's 'real astronomical engine' different?",
+      a: "Most astrology apps calculate compatibility using only the sun sign (your birthday). Duual calculates the real position of each planet — Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn and more — using precise astronomical algorithms. This allows real synastry analysis, not generalities by sign."
+    }
+  },
+  {
+    es: {
+      q: "¿Cómo interpreto el resultado de Duual?",
+      a: "El score es un punto de partida, no una sentencia. Un 85% no garantiza una relación fácil, y un 45% no la hace imposible. Lo que importa es entender las áreas de afinidad (Romance, Vínculo emocional, Comunicación, Largo plazo) y los aspectos específicos entre los planetas. El análisis premium de Duual te da el contexto para interpretar cada punto."
+    },
+    en: {
+      q: "How do I interpret Duual's result?",
+      a: "The score is a starting point, not a verdict. An 85% doesn't guarantee an easy relationship, and a 45% doesn't make it impossible. What matters is understanding the areas of affinity (Romance, Emotional bond, Communication, Long-term) and the specific aspects between planets. Duual's premium analysis gives you the context to interpret each point."
+    }
+  },
+  {
+    es: {
+      q: "¿Puedo analizar más de una pareja?",
+      a: "Sí. Puedes correr tantos análisis como quieras. Con Premium, el historial queda guardado para que puedas comparar y volver a consultar tus resultados anteriores."
+    },
+    en: {
+      q: "Can I analyze more than one partner?",
+      a: "Yes. You can run as many analyses as you want. With Premium, the history is saved so you can compare and revisit your previous results."
+    }
+  }
+];
+
+/* ─── RENDER FAQ ─── */
+function renderFAQ() {
+  const list = document.getElementById('faqList');
+  list.innerHTML = FAQS.map((f, i) => {
+    const {q, a} = f[lang];
+    return `
+      <div class="faq-item" id="faq-${i}">
+        <button class="faq-q" onclick="toggleFAQ(${i})">
+          <span>${q}</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <div class="faq-a-inner">${a}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // update schema
+  const schemaEl = document.getElementById('faqSchema');
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": FAQS.map(f => ({
+      "@type": "Question",
+      "name": f.es.q,
+      "acceptedAnswer": {"@type": "Answer", "text": f.es.a}
+    }))
+  };
+  schemaEl.textContent = JSON.stringify(schemaData);
+}
+
+function toggleFAQ(i) {
+  const item = document.getElementById('faq-' + i);
+  const isOpen = item.classList.contains('open');
+  // close all
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+// Re-render FAQ on lang change
+const _setLang = setLang;
+setLang = function(l, btn) {
+  _setLang(l, btn);
+  renderFAQ();
+};
+
+// Initial render
+renderFAQ();
+</script>
+</body>
+</html>
