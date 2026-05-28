@@ -109,6 +109,18 @@ nav{
   font-family:"DM Sans",sans-serif;font-size:12px;color:var(--txt3);cursor:pointer;}
 .nl.on{background:var(--rose);color:#fff;}
 .nav-right{display:flex;align-items:center;gap:8px;}
+.nav-links{display:flex;align-items:center;gap:2px;margin:0 auto;}
+.nav-link{
+  padding:6px 14px;
+  font-family:"DM Sans",sans-serif;
+  font-size:13px;font-weight:400;
+  color:var(--txt2);
+  text-decoration:none;
+  border-radius:50px;
+  transition:color .2s,background .2s;
+}
+.nav-link:hover{color:var(--txt);background:var(--surf2);}
+@media(max-width:768px){.nav-links{display:none;}}
 
 /* ── SECTIONS ── */
 section{position:relative;z-index:1;}
@@ -694,6 +706,11 @@ footer{
 <!-- Nav -->
 <nav>
   <a class="nav-logo" href="#">Duu<em>al</em></a>
+  <div class="nav-links">
+    <a class="nav-link" href="#calculadora" data-es="Calculadora" data-en="Calculator">Calculadora</a>
+    <a class="nav-link" href="#blog" data-es="Blog" data-en="Blog">Blog</a>
+    <a class="nav-link" href="#faq" data-es="FAQ" data-en="FAQ">FAQ</a>
+  </div>
   <div class="nav-right">
     <div class="nav-lang">
       <button class="nl on" onclick="setLang('es',this)">ES</button>
@@ -710,11 +727,11 @@ footer{
     <span data-es="¿Cuánto se alinean<br>tus planetas<br>con los <em>suyos</em>?" data-en="How well do your<br>planets align<br>with <em>theirs</em>?">¿Cuánto se alinean<br>tus planetas<br>con los <em>suyos</em>?</span>
   </h1>
   <p class="hero-sub" data-es="No es signo solar. No es horóscopo genérico. Es compatibilidad real calculada con tu carta natal completa." data-en="Not sun signs. Not generic horoscopes. Real compatibility calculated from your full natal chart.">No es signo solar. No es horóscopo genérico. Es compatibilidad real calculada con tu carta natal completa.</p>
-  <div class="hero-arrow" onclick="document.getElementById('calc').scrollIntoView({behavior:'smooth'})">↓</div>
+  <div class="hero-arrow" onclick="document.getElementById('calculadora').scrollIntoView({behavior:'smooth'})">↓</div>
 </section>
 
 <!-- Calculator -->
-<section id="calc">
+<section id="calculadora">
   <div class="calc-label" data-es="✦ Calcula tu compatibilidad gratis" data-en="✦ Calculate your compatibility for free">✦ Calcula tu compatibilidad gratis</div>
 
   <div class="persons-wrap">
@@ -1097,7 +1114,7 @@ function runCalc(){
   const tA=parseTime('timeA'),tB=parseTime('timeB');
 
   // hide calc, show loading
-  document.getElementById('calc').style.display='none';
+  document.getElementById('calculadora').style.display='none';
   const lw=document.getElementById('loadingWrap');
   lw.style.display='flex';
   document.getElementById('resultWrap').style.display='none';
