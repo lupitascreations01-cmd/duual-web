@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://duual-web.vercel.app/sitemap.xml
+
+# Crawl-delay optional — omitido para favorecer indexación rápida
